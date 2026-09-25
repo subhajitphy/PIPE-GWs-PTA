@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: "PIPE-PTA: Physics-Informed Encodings and Simulation-Based Inference for Pulsar Timing Arrays"
+message: "If you use this software, please cite the associated paper."
+type: software
+authors:
+  - family-names: Dandapat
+    given-names: Subhajit
+  - family-names: Chua
+    given-names: Alvin J. K.
+version: 1.0.0
+date-released: 2026-09-25
