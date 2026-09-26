@@ -1,106 +1,165 @@
-# PIPE-PTA
+# PIPE-GWs-PTA
 
-**Physics-informed phase encodings + simulation-based inference for eccentric binary black holes in pulsar timing arrays.**
+**Physics-informed phase encodings and simulation-based inference for gravitational waves from eccentric supermassive black-hole binaries in pulsar timing arrays.**
 
-This repository contains the code supporting the DNF/CNF posterior-inference framework described in:
+This repository contains the code supporting the DNF/CNF posterior-inference framework developed for the study:
 
 > **Transformers with Physics-Informed Encodings and Simulation-Based Inference for Robust Detection of Eccentric Binary Black Holes in Pulsar Timing Array Data**
 
-The implementation combines a hierarchical Transformer conditioner, predicted orbital-phase positional encodings, and conditional discrete/continuous normalizing flows. The phase-conditioned contribution can be restricted to the orbital-evolution-sensitive parameters while all parameters remain in one joint posterior.
+The framework combines a hierarchical Transformer conditioner, predicted orbital-phase positional encodings, and conditional discrete/continuous normalizing flows for simulation-based inference (SBI). The phase-conditioned contribution can be restricted to parameters most closely associated with orbital evolution while all inferred parameters remain within a single joint posterior.
+
+A Zenodo dataset record has been reserved for the exact synthetic datasets used in the study:
+
+**Reserved Zenodo DOI:** [10.5281/zenodo.22972338](https://doi.org/10.5281/zenodo.22972338)
+
+---
 
 ## Repository layout
 
 ```text
-PIPE-PTA/
+PIPE-GWs-PTA/
 ├── README.md
 ├── requirements.txt
 ├── CITATION.cff
+├── LICENSE
+│
 ├── models/
 │   ├── pta_encoder.py
 │   ├── phase_predictor.py
 │   ├── hierarchical_dnf.py
 │   └── hierarchical_cnf.py
+│
 ├── training/
 │   ├── run_dnfs.py
 │   └── run_cnfs.py
+│
 ├── phase_prediction/
 │   ├── run_ph_pred_all_snr.py
-│   ├── phase_predictor_best_fast.pt   # add paper checkpoint
+│   ├── phase_predictor_best_fast.pt
 │   └── README.md
+│
 ├── data/
 │   ├── gen_data.py
 │   ├── README.md
-│   └── gwecc/                         # intentionally blank; populate before use
+│   └── gwecc/
+│
 └── outputs/
 ```
+
+The `data/gwecc/` directory is intentionally left empty in the public repository. Populate it with the waveform-generation routines and `pulsar_info.csv` used for the study before regenerating the simulations.
+
+---
 
 ## Installation
 
 Python 3.10+ is recommended.
 
 ```bash
+git clone https://github.com/subhajitphy/PIPE-GWs-PTA.git
+cd PIPE-GWs-PTA
+
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-The CNF implementation additionally uses `torchdiffeq` (included in `requirements.txt`).
+The CNF implementation additionally requires `torchdiffeq`, which is included in `requirements.txt`.
+
+---
 
 ## Data
 
-The exact default and expanded datasets used in the paper will be archived separately on **Zenodo**. Place the downloaded NPZ files in `data/` using the names described in `data/README.md`.
+The exact synthetic PTA datasets used in the study will be archived on Zenodo under the reserved DOI:
 
-The simulations can alternatively be regenerated from source with:
+**Reserved Zenodo DOI:** [10.5281/zenodo.22972338](https://doi.org/10.5281/zenodo.22972338)
+
+The release contains two datasets.
+
+### Default dataset
+
+```text
+lr_signals_3PN_E_B_phase.npz
+```
+
+This dataset is used for the primary DNF/CNF posterior-inference experiments.
+
+### Expanded dataset
+
+```text
+lr_signals_with_params_E_B_phase_base.npz
+```
+
+This larger dataset is used for the large-data regime, higher-dimensional posterior analysis, and phase-prediction experiments.
+
+After downloading the datasets, place the required NPZ file in `data/`, or provide its location through the environment variables described below.
+
+The simulations can alternatively be regenerated using:
 
 ```bash
 python data/gen_data.py
 ```
 
-The `data/gwecc/` folder is intentionally blank in this archive. Populate it with the waveform-generation code and `pulsar_info.csv` used for the study before regenerating data.
+The data-generation pipeline produces synthetic PTA timing residuals, orbital-phase evolution, source parameters, and associated metadata.
 
-## Phase predictor
+---
 
-The predicted-phase model operates on the full PTA realisation and predicts the shared orbital phase (and a realisation-level SNR diagnostic). The pretrained paper checkpoint should be placed at:
+## Phase prediction
+
+The phase-prediction network operates on the full PTA realisation and predicts the shared orbital phase of the source together with a realisation-level SNR diagnostic.
+
+The pretrained checkpoint used by the posterior-inference models is located at:
 
 ```text
 phase_prediction/phase_predictor_best_fast.pt
 ```
 
-To retrain it from the expanded dataset:
+To retrain the phase-prediction network:
 
 ```bash
 python phase_prediction/run_ph_pred_all_snr.py
 ```
 
-The default training setup uses SNR 10--100 with log-uniform SNR sampling.
+The default phase-prediction setup uses an SNR range of 10--100 with log-uniform SNR sampling.
+
+The orbital phase is represented through
+
+```text
+(cos φ, sin φ)
+```
+
+rather than regressing directly on a wrapped angular variable.
+
+---
 
 ## Posterior inference
 
-Both `training/run_dnfs.py` and `training/run_cnfs.py` support the two configurations compared in the paper.
+Posterior inference is implemented using:
 
-### 1. No-phase baseline
+- **DNF:** a conditional discrete normalizing flow based on affine coupling transformations.
+- **CNF:** a conditional continuous normalizing flow based on neural ODE evolution.
 
-Set in the chosen runner:
+Both approaches use the same hierarchical Transformer conditioning architecture and support the phase-agnostic and predicted-phase configurations compared in the study.
+
+---
+
+## 1. No-phase baseline
+
+For the phase-agnostic baseline, set in either `training/run_dnfs.py` or `training/run_cnfs.py`:
 
 ```python
 USE_TRUE_PHASE = False
 USE_PHASE_PROVIDER = False
 ```
 
-This gives `USE_PHASE = False`; the posterior is conditioned only on the base hierarchical Transformer representation.
-
-### 2. Predicted-phase PIPE model
-
-Set:
+This gives:
 
 ```python
-USE_TRUE_PHASE = False
-USE_PHASE_PROVIDER = True
+USE_PHASE = False
 ```
 
-This gives `USE_PHASE = True` and loads `phase_prediction/phase_predictor_best_fast.pt` through `PhaseProvider`. The true orbital phase is **not** exposed to the posterior estimator.
+The posterior estimator is then conditioned only on the base hierarchical Transformer representation.
 
-Then run either:
+Run either:
 
 ```bash
 python training/run_dnfs.py
@@ -112,67 +171,321 @@ or
 python training/run_cnfs.py
 ```
 
-Outputs are written under `outputs/` in mode-specific directories.
+---
+
+## 2. Predicted-phase PIPE model
+
+For predicted-phase conditioning, set:
+
+```python
+USE_TRUE_PHASE = False
+USE_PHASE_PROVIDER = True
+```
+
+This gives:
+
+```python
+USE_PHASE = True
+```
+
+The pretrained phase predictor is loaded through `PhaseProvider`.
+
+The true orbital phase is **not** supplied to the posterior estimator in this configuration. Instead, the phase is inferred from the noisy PTA realisation and then used to construct the physics-informed phase encoding.
+
+Run either:
+
+```bash
+python training/run_dnfs.py
+```
+
+or
+
+```bash
+python training/run_cnfs.py
+```
+
+Training outputs, checkpoints, and diagnostics are written to mode-specific output directories.
+
+---
+
+## Hierarchical Transformer conditioner
+
+The posterior-inference models use a hierarchical Transformer architecture.
+
+Each pulsar time series is first processed independently using:
+
+- 1D patch embeddings,
+- sinusoidal positional encoding,
+- optional physics-informed phase encoding,
+- standard multi-head self-attention.
+
+The resulting pulsar-level representations are then processed using cross-pulsar self-attention to capture array-level correlations.
+
+The final pooled representation provides the conditioning context for the DNF or CNF posterior estimator.
+
+---
+
+## Physics-informed phase conditioning
+
+The posterior architecture uses separate base and phase-conditioned representations:
+
+```text
+h_base  = E_base(x)
+h_phase = E_phase(x, φ)
+h_delta = h_phase - h_base
+```
+
+The base representation is always supplied to the posterior estimator.
+
+When predicted-phase conditioning is enabled, the additional phase-dependent contribution `h_delta` is injected only into selected parameter dimensions. This allows the model to exploit explicit orbital-phase information while preserving a single joint posterior over all inferred parameters.
+
+---
 
 ## Default 4D posterior experiment
 
-The current runners infer
-
-```python
-target_names = ["log10_n", "e0", "log10_M", "log10_A"]
-```
-
-with direct phase-conditioned corrections restricted to
-
-```python
-phase_target_names = ["log10_n", "e0", "log10_M"]
-```
-
-The DNF applies this mask to the phase-dependent affine-coupling correction; the CNF applies it to the phase-dependent vector-field contribution.
-
-## Full higher-dimensional experiment
-
-For the full EBBH source-parameter analysis, set `target_names` to the full parameter vector stored by `gen_data.py`, for example:
+The default posterior experiment infers:
 
 ```python
 target_names = [
-    "cos_gwtheta", "gwphi", "psi", "cos_inc",
-    "log10_n", "q", "e0", "log10_M", "log10_A",
+    "log10_n",
+    "e0",
+    "log10_M",
+    "log10_A",
 ]
-phase_target_names = ["log10_n", "e0", "log10_M"]
 ```
 
-Use the expanded dataset from Zenodo for the large-data analysis.
+The direct phase-conditioned contribution is restricted to:
 
-## Selecting a different dataset or checkpoint
+```python
+phase_target_names = [
+    "log10_n",
+    "e0",
+    "log10_M",
+]
+```
 
-The repository-ready runners support environment overrides without editing machine-specific paths:
+The amplitude parameter `log10_A` remains part of the same joint posterior but does not receive a direct phase-conditioned correction.
+
+---
+
+## Masked phase conditioning
+
+For the DNF, phase conditioning modifies only the selected transformed coordinates of each affine coupling layer.
+
+Schematically,
+
+```text
+(s, t)
+=
+(s_base, t_base)
++
+m_phi ⊙ (Δs_phi, Δt_phi).
+```
+
+For the CNF, the phase-dependent correction is applied to selected components of the continuous vector field:
+
+```text
+dθ/dt
+=
+f_base
++
+g_phi m_phi ⊙ f_phi.
+```
+
+Here:
+
+- `m_phi` denotes the phase-target mask,
+- `g_phi` is an explicit phase gate,
+- all inferred parameters remain within the same joint flow.
+
+---
+
+## Higher-dimensional experiment
+
+The synthetic datasets also contain the broader EBBH source-parameter vector:
+
+```python
+target_names = [
+    "cos_gwtheta",
+    "gwphi",
+    "psi",
+    "cos_inc",
+    "log10_n",
+    "q",
+    "e0",
+    "log10_M",
+    "log10_A",
+]
+```
+
+For the higher-dimensional analysis, the direct phase-conditioned subset remains:
+
+```python
+phase_target_names = [
+    "log10_n",
+    "e0",
+    "log10_M",
+]
+```
+
+The expanded dataset should be used for the corresponding large-data analysis.
+
+---
+
+## Selecting a different dataset
+
+The training scripts support environment-variable overrides so that machine-specific paths do not need to be hard-coded.
+
+To select a dataset:
 
 ```bash
-PIPE_PTA_DATASET=my_dataset.npz python training/run_dnfs.py
+PIPE_PTA_DATASET=lr_signals_3PN_E_B_phase.npz \
+python training/run_dnfs.py
 ```
+
+or
+
+```bash
+PIPE_PTA_DATASET=lr_signals_3PN_E_B_phase.npz \
+python training/run_cnfs.py
+```
+
+A different local data directory can be supplied using:
+
+```bash
+PIPE_PTA_DATA_PATH=/path/to/data \
+python training/run_dnfs.py
+```
+
+For the expanded dataset:
+
+```bash
+PIPE_PTA_DATASET=lr_signals_with_params_E_B_phase_base.npz \
+python training/run_dnfs.py
+```
+
+---
+
+## Selecting the phase-predictor checkpoint
+
+A different phase-predictor checkpoint can be supplied using:
+
+```bash
+PIPE_PTA_PHASE_CKPT=/path/to/phase_predictor_best_fast.pt \
+python training/run_dnfs.py
+```
+
+or
 
 ```bash
 PIPE_PTA_PHASE_CKPT=/path/to/phase_predictor_best_fast.pt \
 python training/run_cnfs.py
 ```
 
-A different local data directory can be supplied with `PIPE_PTA_DATA_PATH`.
+---
 
-## Reproducibility notes
+## Reproducibility
 
-- Global random seed: `42` in the released training/data-generation scripts.
-- DNF posterior training: AdamW, deterministic split/noise generation, early stopping, and learning-rate scheduling are defined in `training/run_dnfs.py`.
-- CNF posterior training: fp32 ODE training with exact divergence and the RK4 solver settings used in the study are defined in `training/run_cnfs.py`.
-- The hierarchical encoder uses standard multi-head self-attention for both per-pulsar temporal processing and cross-pulsar aggregation.
-- Checkpoints store model state and data-standardization statistics used by posterior training.
+The released scripts contain the principal settings required to reproduce the experiments.
 
-Exact numerical agreement can still depend on PyTorch/CUDA/hardware versions. For archival reproduction, record the environment used for the final paper run together with the Zenodo release.
+Key reproducibility settings include:
+
+- global random seed: `42`,
+- deterministic train/validation splitting,
+- deterministic noise generation with fixed seeds,
+- fixed model hyperparameters,
+- AdamW optimization,
+- learning-rate scheduling,
+- early stopping based on validation loss,
+- gradient clipping,
+- stored input/output standardization statistics.
+
+### DNF
+
+The DNF implementation uses conditional affine coupling transformations with a hierarchical self-attention Transformer conditioner.
+
+Training settings are defined in:
+
+```text
+training/run_dnfs.py
+```
+
+### CNF
+
+The CNF implementation uses neural ODE evolution and evaluates the divergence exactly in the low-dimensional posterior space.
+
+The released configuration uses:
+
+```text
+ODE solver:       RK4
+absolute tol.:    1e-3
+relative tol.:    1e-3
+step size:        0.1
+training dtype:   fp32
+```
+
+Training settings are defined in:
+
+```text
+training/run_cnfs.py
+```
+
+### Attention
+
+The released hierarchical PTA encoder uses standard multi-head self-attention for both:
+
+1. per-pulsar temporal processing, and
+2. cross-pulsar aggregation.
+
+No external-attention module is used in the released architecture.
+
+---
+
+## Checkpoints
+
+Posterior checkpoints store information including:
+
+- model state,
+- optimizer state,
+- training epoch,
+- validation performance,
+- target parameter names,
+- phase-target indices,
+- data-standardization statistics,
+- model configuration metadata.
+
+The pretrained phase-prediction checkpoint additionally stores the normalization statistics required for phase inference.
+
+Exact numerical agreement can depend on the PyTorch, CUDA, GPU, and hardware environment.
+
+---
 
 ## Data availability
 
-The exact synthetic datasets supporting the paper (default and expanded realisation sets) are intended to be deposited on Zenodo. Add the DOI here when the deposit is finalized.
+The exact synthetic PTA datasets supporting the study, including the default and expanded realisation datasets, are being prepared for public release on Zenodo under:
+
+**Reserved DOI:** [10.5281/zenodo.22972338](https://doi.org/10.5281/zenodo.22972338)
+
+The source code for data generation, phase prediction, and DNF/CNF posterior inference is provided in this repository.
+
+This section will be updated when the Zenodo dataset record is formally published.
+
+---
+
+## License
+
+The software in this repository is released under the **MIT License**.
+
+The associated Zenodo datasets are distributed under their separately specified data license.
+
+---
 
 ## Citation
 
-Citation metadata are provided in `CITATION.cff`. Please cite the associated paper if you use this code or data.
+Citation information for the associated paper will be added after acceptance/publication.
+
+---
+
+## Contact
+
+For questions about the code, datasets, or reproducibility of the analysis, please open an issue in this repository.
