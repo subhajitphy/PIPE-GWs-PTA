@@ -4,11 +4,13 @@
 
 This repository contains the public implementation of the DNF/CNF posterior-inference framework developed for:
 
-> **Transformers with Physics-Informed Encodings and Simulation-Based Inference for Robust Detection of Eccentric Binary Black Holes in Pulsar Timing Array Data**
+> **[Transformers with Physics-Informed Encodings and Simulation-Based Inference for Robust Detection of Eccentric Binary Black Holes in Pulsar Timing Array Data](https://arxiv.org/abs/2607.03904)**
 
-The code includes data generation, phase prediction, hierarchical Transformer conditioning, and discrete/continuous normalizing-flow posterior inference.
+The repository includes the code for data generation, phase prediction, hierarchical Transformer conditioning, and discrete/continuous normalizing-flow posterior inference.
 
-**Reserved Zenodo dataset DOI:** [10.5281/zenodo.22972338](https://doi.org/10.5281/zenodo.22972338)
+**Reserved Zenodo dataset DOI:** `10.5281/zenodo.22972338`
+
+> The Zenodo record is currently a draft. The DOI will become the public dataset DOI when the record is published.
 
 ---
 
@@ -52,6 +54,8 @@ The `data/gwecc/` directory is intentionally left empty in the public repository
 
 Python 3.10+ is recommended.
 
+### macOS / Linux
+
 ```bash
 git clone https://github.com/subhajitphy/PIPE-GWs-PTA.git
 cd PIPE-GWs-PTA
@@ -61,9 +65,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-For Windows:
+### Windows
 
 ```bash
+git clone https://github.com/subhajitphy/PIPE-GWs-PTA.git
+cd PIPE-GWs-PTA
+
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
@@ -75,25 +82,33 @@ The CNF implementation requires `torchdiffeq`, which is included in `requirement
 
 ## Data
 
-The exact synthetic PTA datasets used in the study are being prepared for release on Zenodo under:
+The exact synthetic PTA datasets used in the study have been uploaded to a Zenodo draft and will be made publicly available under the reserved DOI:
 
-**Reserved DOI:** [10.5281/zenodo.22972338](https://doi.org/10.5281/zenodo.22972338)
+**Reserved DOI:** `10.5281/zenodo.22972338`
 
-Two datasets are used:
+The Zenodo deposit contains:
 
 ```text
-lr_signals_3PN_E_B_phase.npz
+PIPE_GWs_3PN_PTA_default_realizations.npz
 ```
 
 Default dataset used for the primary posterior-inference experiments.
 
 ```text
-lr_signals_with_params_E_B_phase_base.npz
+PIPE_GWs_3PN_PTA_expanded_realizations.npz
 ```
 
-Expanded dataset used for the large-data and phase-prediction analyses.
+Expanded dataset used for the large-data, higher-dimensional, and phase-prediction analyses.
 
-Place the required dataset inside:
+The Zenodo record also contains:
+
+```text
+README_DATA.md
+```
+
+with dataset-level documentation.
+
+After downloading a dataset, place it inside:
 
 ```text
 data/
@@ -105,7 +120,7 @@ or specify its location using the environment variables described below.
 
 ## Phase-predictor checkpoint
 
-For predicted-phase inference, place the pretrained checkpoint at:
+For predicted-phase inference, place the pretrained phase-predictor checkpoint at:
 
 ```text
 phase_prediction/phase_predictor_best_fast.pt
@@ -114,13 +129,15 @@ phase_prediction/phase_predictor_best_fast.pt
 A different checkpoint can be supplied with:
 
 ```bash
-PIPE_PTA_PHASE_CKPT=/path/to/phase_predictor_best_fast.pt python training/run_dnfs.py
+PIPE_PTA_PHASE_CKPT=/path/to/phase_predictor_best_fast.pt \
+python training/run_dnfs.py
 ```
 
 or
 
 ```bash
-PIPE_PTA_PHASE_CKPT=/path/to/phase_predictor_best_fast.pt python training/run_cnfs.py
+PIPE_PTA_PHASE_CKPT=/path/to/phase_predictor_best_fast.pt \
+python training/run_cnfs.py
 ```
 
 ---
@@ -174,7 +191,7 @@ Then run:
 python training/run_dnfs.py
 ```
 
-The pretrained phase predictor is loaded automatically through `PhaseProvider`.
+The pretrained phase predictor is loaded through `PhaseProvider`. The true orbital phase is not supplied to the posterior estimator in this configuration.
 
 ---
 
@@ -224,28 +241,39 @@ The CNF is trained in fp32 and uses the ODE settings defined directly in `traini
 
 The runners support environment-variable overrides.
 
-To use the default dataset:
+### Default dataset
 
 ```bash
-PIPE_PTA_DATASET=lr_signals_3PN_E_B_phase.npz python training/run_dnfs.py
+PIPE_PTA_DATASET=PIPE_GWs_3PN_PTA_default_realizations.npz \
+python training/run_dnfs.py
 ```
 
 or
 
 ```bash
-PIPE_PTA_DATASET=lr_signals_3PN_E_B_phase.npz python training/run_cnfs.py
+PIPE_PTA_DATASET=PIPE_GWs_3PN_PTA_default_realizations.npz \
+python training/run_cnfs.py
 ```
 
-To use the expanded dataset:
+### Expanded dataset
 
 ```bash
-PIPE_PTA_DATASET=lr_signals_with_params_E_B_phase_base.npz python training/run_dnfs.py
+PIPE_PTA_DATASET=PIPE_GWs_3PN_PTA_expanded_realizations.npz \
+python training/run_dnfs.py
 ```
 
-A different data directory can be supplied with:
+or
 
 ```bash
-PIPE_PTA_DATA_PATH=/path/to/data python training/run_dnfs.py
+PIPE_PTA_DATASET=PIPE_GWs_3PN_PTA_expanded_realizations.npz \
+python training/run_cnfs.py
+```
+
+### Different local data directory
+
+```bash
+PIPE_PTA_DATA_PATH=/path/to/data \
+python training/run_dnfs.py
 ```
 
 The same environment variables can be used with the CNF runner.
@@ -254,7 +282,7 @@ The same environment variables can be used with the CNF runner.
 
 ## Training the phase predictor
 
-The phase-prediction model can be retrained using:
+The phase-prediction network can be retrained using:
 
 ```bash
 python phase_prediction/run_ph_pred_all_snr.py
@@ -267,7 +295,7 @@ SNR range: 10--100
 sampling:  log-uniform
 ```
 
-The model predicts the orbital phase using the circular representation:
+The model predicts the orbital phase through the circular representation
 
 ```text
 (cos φ, sin φ)
@@ -275,11 +303,17 @@ The model predicts the orbital phase using the circular representation:
 
 together with a realisation-level SNR diagnostic.
 
+For phase-predictor training, use the expanded dataset:
+
+```text
+PIPE_GWs_3PN_PTA_expanded_realizations.npz
+```
+
 ---
 
 ## Regenerating the simulations
 
-The synthetic PTA data can be regenerated using:
+The synthetic PTA simulations can be regenerated using:
 
 ```bash
 python data/gen_data.py
@@ -293,13 +327,19 @@ data/gwecc/
 
 with the waveform-generation code and `pulsar_info.csv` used for the study.
 
-The default generator writes:
+The current generator writes the default dataset using its internal filename:
 
 ```text
 lr_signals_3PN_E_B_phase.npz
 ```
 
-and stores the simulated timing residuals, orbital phase, source parameters, and metadata.
+For the public Zenodo release, the corresponding dataset is archived using the clearer filename:
+
+```text
+PIPE_GWs_3PN_PTA_default_realizations.npz
+```
+
+The generator stores the simulated timing residuals, orbital phase, source parameters, and metadata required by the downstream inference scripts.
 
 ---
 
@@ -335,9 +375,11 @@ Exact numerical agreement can depend on PyTorch, CUDA, GPU, and hardware version
 
 ## Data availability
 
-The exact synthetic datasets supporting the study are being prepared for public release on Zenodo under:
+The exact synthetic PTA datasets supporting the study, including the default and expanded realisation datasets, have been uploaded to a Zenodo draft and will be made publicly available under:
 
-**Reserved DOI:** [10.5281/zenodo.22972338](https://doi.org/10.5281/zenodo.22972338)
+**Reserved DOI:** `10.5281/zenodo.22972338`
+
+The corresponding data-generation, phase-prediction, and posterior-inference code is provided in this repository.
 
 This section will be updated once the Zenodo record is formally published.
 
@@ -353,7 +395,15 @@ The associated Zenodo datasets use a separately specified data license.
 
 ## Citation
 
-Citation information for the associated paper will be added after acceptance/publication.
+The associated manuscript is available as an arXiv preprint:
+
+**S. Dandapat and A. J. K. Chua**,  
+*Transformers with Physics-Informed Encodings and Simulation-Based Inference for Robust Detection of Eccentric Binary Black Holes in Pulsar Timing Array Data*,  
+[arXiv:2607.03904](https://arxiv.org/abs/2607.03904) (2026).
+
+The journal citation will be added after publication.
+
+Once the Zenodo dataset record is published, its final citation information will also be added here.
 
 ---
 
