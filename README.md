@@ -324,14 +324,10 @@ with the waveform-generation code and `pulsar_info.csv` used for the study.
 The current generator writes the default dataset using its internal filename:
 
 ```text
-lr_signals_3PN_E_B_phase.npz
-```
-
-For the public Zenodo release, the corresponding dataset is archived using the clearer filename:
-
-```text
 PIPE_GWs_3PN_PTA_default_realizations.npz
 ```
+
+
 
 The generator stores the simulated timing residuals, orbital phase, source parameters, and metadata required by the downstream inference scripts.
 
