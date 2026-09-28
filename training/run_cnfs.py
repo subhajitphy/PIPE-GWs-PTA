@@ -11,7 +11,7 @@ from torch.utils.data import TensorDataset, DataLoader
 # ==========================================================
 # PATHS
 # ==========================================================
-PKG_PATH = "/scratch/subh_phy/work/12Sep/packages/v2_same_current_run/"
+PKG_PATH = "/../models/"
 sys.path.insert(0, PKG_PATH)
 
 from phase_predictor import PhaseProvider
@@ -52,10 +52,17 @@ AMP_ENABLED = False
 print("Device:", device, "| AMP:", AMP_ENABLED)
 
 # ==========================================================
-# CONFIG
+# DATA
 # ==========================================================
-DATA_PATH  = "/scratch/projects/CFP03/CFP03-CF-051/projects/SBI/2Apr/new_method/realisation_paper/data/mid"
-NPZ_NAME   = "lr_signals_3PN_E_B_phase.npz"
+# Download one of the PTA realisation datasets from the accompanying
+# Zenodo repository:
+# https://doi.org/10.5281/zenodo.22972338
+#
+# Set DATA_PATH to the directory containing the downloaded dataset and
+# NPZ_NAME to the selected realisation file.
+
+DATA_PATH = ""
+NPZ_NAME  = ""
 
 VAL_SPLIT  = 0.10
 # CNF is substantially heavier than DNF because each likelihood evaluation
@@ -93,6 +100,11 @@ target_names = ["log10_n","e0", "log10_M", "log10_A"]
 phase_target_names = ["log10_n","e0", "log10_M"]
 
 USE_TRUE_PHASE     = False
+
+
+# Set according to the desired inference mode:
+# True enables predicted-phase conditioning via the pretrained PhaseProvider,
+# while False disables the predicted-phase input for the no-phase baseline.
 USE_PHASE_PROVIDER = True
 USE_PHASE          = bool(USE_TRUE_PHASE or USE_PHASE_PROVIDER)
 
