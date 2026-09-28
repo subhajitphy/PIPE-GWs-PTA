@@ -1,16 +1,32 @@
 # PIPE-GWs-PTA
 
+[![arXiv](https://img.shields.io/badge/arXiv-2607.03904-b31b1b.svg)](https://arxiv.org/abs/2607.03904)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22972338.svg)](https://doi.org/10.5281/zenodo.22972338)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+
 **Physics-informed phase encodings and simulation-based inference for gravitational waves from eccentric supermassive black-hole binaries in pulsar timing arrays.**
 
-This repository contains the public implementation of the DNF/CNF posterior-inference framework developed for:
+This repository contains the public implementation of the physics-informed
+Transformer and simulation-based inference framework developed for:
 
 > **[Transformers with Physics-Informed Encodings and Simulation-Based Inference for Robust Detection of Eccentric Binary Black Holes in Pulsar Timing Array Data](https://arxiv.org/abs/2607.03904)**
 
-The repository includes the code for data generation, phase prediction, hierarchical Transformer conditioning, and discrete/continuous normalizing-flow posterior inference.
+The framework combines:
 
-**Reserved Zenodo dataset DOI:** `10.5281/zenodo.22972338`
+- physics-informed orbital-phase encodings,
+- hierarchical Transformer representations of multi-pulsar timing residuals,
+- a pretrained orbital-phase prediction network,
+- Discrete Normalizing Flows (DNFs),
+- Continuous Normalizing Flows (CNFs),
+- parameter-selective phase conditioning for posterior inference.
 
-> The Zenodo record is currently a draft. The DOI will become the public dataset DOI when the record is published.
+The synthetic pulsar timing array datasets used in the study are publicly
+available on Zenodo:
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22972338.svg)](https://doi.org/10.5281/zenodo.22972338)
+
+**Dataset DOI:** [`10.5281/zenodo.22972338`](https://doi.org/10.5281/zenodo.22972338)
 
 ---
 
