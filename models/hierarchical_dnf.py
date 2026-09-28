@@ -4,7 +4,6 @@
 """
 hierarchical_dnf.py
 
-HIERARCHICAL MASKED PHASE DNF WITH STANDARD SELF-ATTENTION
 
 Goal:
 - Keep ONE joint posterior / ONE joint RealNVP flow.
