@@ -25,13 +25,8 @@ CNF vector field
                 + phase_gate * phase_mask * f_phase(theta, h_base, h_delta, t)
 
 The explicit phase_gate is important: when phase conditioning is disabled the
-phase branch is EXACTLY zero. Merely replacing h_delta by zeros is insufficient,
-because a neural network can still output a non-zero value from biases and from
-(theta, h_base, t).
+phase branch is EXACTLY zero. 
 
-For the small posterior dimension used here (D=4 by default), divergence is
-computed exactly rather than with a stochastic Hutchinson trace estimator.
-This makes validation NLL deterministic and removes trace-estimator noise.
 
 API
 ---
