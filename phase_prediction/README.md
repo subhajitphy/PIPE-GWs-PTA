@@ -5,7 +5,7 @@
 By default it reads:
 
 ```text
-data/lr_signals_3PN_E_B_phase_expanded.npz
+data/PIPE_GWs_3PN_PTA_expanded_realizations.npz
 ```
 
 and trains over realisation SNR 10--100 with log-uniform SNR sampling.
