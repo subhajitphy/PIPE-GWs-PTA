@@ -4,8 +4,6 @@
 """
 hierarchical_cnf.py
 
-HIERARCHICAL MASKED PHASE CNF WITH STANDARD SELF-ATTENTION
-
 Goal
 ----
 - Keep ONE joint posterior / ONE joint continuous normalizing flow (CNF).
