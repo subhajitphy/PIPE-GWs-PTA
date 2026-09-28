@@ -7,8 +7,7 @@
 
 **Physics-informed phase encodings and simulation-based inference for gravitational waves from eccentric supermassive black-hole binaries in pulsar timing arrays.**
 
-This repository contains the public implementation of the physics-informed
-Transformer and simulation-based inference framework developed for:
+This repository contains the public implementation of the physics-informed Transformer and simulation-based inference framework developed for:
 
 > **[Transformers with Physics-Informed Encodings and Simulation-Based Inference for Robust Detection of Eccentric Binary Black Holes in Pulsar Timing Array Data](https://arxiv.org/abs/2607.03904)**
 
@@ -21,8 +20,7 @@ The framework combines:
 - Continuous Normalizing Flows (CNFs),
 - parameter-selective phase conditioning for posterior inference.
 
-The synthetic pulsar timing array datasets used in the study are publicly
-available on Zenodo:
+The synthetic pulsar timing array datasets used in the study are publicly available on Zenodo:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22972338.svg)](https://doi.org/10.5281/zenodo.22972338)
 
@@ -98,11 +96,11 @@ The CNF implementation requires `torchdiffeq`, which is included in `requirement
 
 ## Data
 
-The exact synthetic PTA datasets used in the study have been uploaded to a Zenodo draft and will be made publicly available under the reserved DOI:
+The exact synthetic PTA datasets used in the study are publicly available on Zenodo:
 
-**Reserved DOI:** `10.5281/zenodo.22972338`
+**Dataset DOI:** [`10.5281/zenodo.22972338`](https://doi.org/10.5281/zenodo.22972338)
 
-The Zenodo deposit contains:
+The Zenodo record contains:
 
 ```text
 PIPE_GWs_3PN_PTA_default_realizations.npz
@@ -124,13 +122,17 @@ README_DATA.md
 
 with dataset-level documentation.
 
-After downloading a dataset, place it inside:
+After downloading a compatible dataset from Zenodo, set its local location in the DNF/CNF runner:
 
-```text
-data/
+```python
+# Choose a compatible PTA realisation dataset from:
+# https://doi.org/10.5281/zenodo.22972338
+
+DATA_PATH = ""
+NPZ_NAME  = ""
 ```
 
-or specify its location using the environment variables described below.
+where `DATA_PATH` is the local directory containing the downloaded dataset and `NPZ_NAME` is the selected `.npz` file.
 
 ---
 
@@ -142,19 +144,7 @@ For predicted-phase inference, place the pretrained phase-predictor checkpoint a
 phase_prediction/phase_predictor_best_fast.pt
 ```
 
-A different checkpoint can be supplied with:
-
-```bash
-PIPE_PTA_PHASE_CKPT=/path/to/phase_predictor_best_fast.pt \
-python training/run_dnfs.py
-```
-
-or
-
-```bash
-PIPE_PTA_PHASE_CKPT=/path/to/phase_predictor_best_fast.pt \
-python training/run_cnfs.py
-```
+A different checkpoint can be supplied by changing the phase-checkpoint path in the corresponding training runner.
 
 ---
 
@@ -182,7 +172,6 @@ target_names = [
 Set in `training/run_dnfs.py`:
 
 ```python
-USE_TRUE_PHASE = False
 USE_PHASE_PROVIDER = False
 ```
 
@@ -197,7 +186,9 @@ python training/run_dnfs.py
 Set:
 
 ```python
-USE_TRUE_PHASE = False
+# Set according to the desired inference mode:
+# True enables predicted-phase conditioning via the pretrained PhaseProvider,
+# while False disables the predicted-phase input for the no-phase baseline.
 USE_PHASE_PROVIDER = True
 ```
 
@@ -224,7 +215,6 @@ python training/run_cnfs.py
 Set in `training/run_cnfs.py`:
 
 ```python
-USE_TRUE_PHASE = False
 USE_PHASE_PROVIDER = False
 ```
 
@@ -239,7 +229,9 @@ python training/run_cnfs.py
 Set:
 
 ```python
-USE_TRUE_PHASE = False
+# Set according to the desired inference mode:
+# True enables predicted-phase conditioning via the pretrained PhaseProvider,
+# while False disables the predicted-phase input for the no-phase baseline.
 USE_PHASE_PROVIDER = True
 ```
 
@@ -255,44 +247,30 @@ The CNF is trained in fp32 and uses the ODE settings defined directly in `traini
 
 ## Selecting a dataset
 
-The runners support environment-variable overrides.
+Download either compatible realisation dataset from Zenodo:
+
+**https://doi.org/10.5281/zenodo.22972338**
+
+Then set:
+
+```python
+DATA_PATH = ""
+NPZ_NAME  = ""
+```
+
+in the corresponding DNF/CNF runner.
 
 ### Default dataset
 
-```bash
-PIPE_PTA_DATASET=PIPE_GWs_3PN_PTA_default_realizations.npz \
-python training/run_dnfs.py
-```
-
-or
-
-```bash
-PIPE_PTA_DATASET=PIPE_GWs_3PN_PTA_default_realizations.npz \
-python training/run_cnfs.py
+```text
+PIPE_GWs_3PN_PTA_default_realizations.npz
 ```
 
 ### Expanded dataset
 
-```bash
-PIPE_PTA_DATASET=PIPE_GWs_3PN_PTA_expanded_realizations.npz \
-python training/run_dnfs.py
+```text
+PIPE_GWs_3PN_PTA_expanded_realizations.npz
 ```
-
-or
-
-```bash
-PIPE_PTA_DATASET=PIPE_GWs_3PN_PTA_expanded_realizations.npz \
-python training/run_cnfs.py
-```
-
-### Different local data directory
-
-```bash
-PIPE_PTA_DATA_PATH=/path/to/data \
-python training/run_dnfs.py
-```
-
-The same environment variables can be used with the CNF runner.
 
 ---
 
@@ -311,7 +289,7 @@ SNR range: 10--100
 sampling:  log-uniform
 ```
 
-The model predicts the orbital phase through the circular representation
+The model predicts the orbital phase through the circular representation:
 
 ```text
 (cos φ, sin φ)
@@ -391,13 +369,13 @@ Exact numerical agreement can depend on PyTorch, CUDA, GPU, and hardware version
 
 ## Data availability
 
-The exact synthetic PTA datasets supporting the study, including the default and expanded realisation datasets, have been uploaded to a Zenodo draft and will be made publicly available under:
+The exact synthetic PTA datasets supporting the study, including the default and expanded realisation datasets, are openly available on Zenodo:
 
-**Reserved DOI:** `10.5281/zenodo.22972338`
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22972338.svg)](https://doi.org/10.5281/zenodo.22972338)
+
+**Dataset DOI:** [`10.5281/zenodo.22972338`](https://doi.org/10.5281/zenodo.22972338)
 
 The corresponding data-generation, phase-prediction, and posterior-inference code is provided in this repository.
-
-This section will be updated once the Zenodo record is formally published.
 
 ---
 
@@ -419,7 +397,9 @@ The associated manuscript is available as an arXiv preprint:
 
 The journal citation will be added after publication.
 
-Once the Zenodo dataset record is published, its final citation information will also be added here.
+Please also cite the associated Zenodo dataset:
+
+**Dataset DOI:** [`10.5281/zenodo.22972338`](https://doi.org/10.5281/zenodo.22972338)
 
 ---
 
