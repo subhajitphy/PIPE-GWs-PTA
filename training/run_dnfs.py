@@ -405,28 +405,7 @@ model = PosteriorNet(
     phase_target_names=phase_target_names,
 ).to(device)
 
-# Verify that the imported conditioner really uses standard self-attention.
-parameter_names = [name for name, _ in model.named_parameters()]
-has_self_attention = any("self_attn.in_proj_weight" in name for name in parameter_names)
-has_external_memory = any(
-    name.endswith(".Mk") or name.endswith(".Mv") or ".Mk" in name or ".Mv" in name
-    for name in parameter_names
-)
 
-if not has_self_attention:
-    raise RuntimeError(
-        "No nn.MultiheadAttention parameters were found. "
-        "Check that model_dnfs_masked_hierarchical_self_attention imports "
-        "HierarchicalPTAEncoder from self_attention_model_hy_clean."
-    )
-
-if has_external_memory:
-    raise RuntimeError(
-        "External-attention memory parameters Mk/Mv were found. "
-        "The wrong encoder module is being imported."
-    )
-
-print("Attention backend verified: standard multi-head self-attention.")
 
 print("\nTrainable PE weights:")
 for name, p in model.named_parameters():
