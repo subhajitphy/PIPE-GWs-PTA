@@ -22,10 +22,3 @@ The best fast checkpoint is written as:
 phase_prediction/phase_predictor_best_fast.pt
 ```
 
-For the public repository, place the paper checkpoint `phase_predictor_best_fast.pt` in this directory. The DNF/CNF runners load it automatically in predicted-phase mode.
-
-To use a different input dataset:
-
-```bash
-PIPE_PTA_PHASE_DATASET=my_dataset.npz python phase_prediction/run_ph_pred_all_snr.py
-```
