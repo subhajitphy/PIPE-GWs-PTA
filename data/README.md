@@ -6,8 +6,8 @@ The exact datasets used in the paper are intended to be archived on Zenodo. Befo
 
 Expected filenames:
 
-- `lr_signals_3PN_E_B_phase.npz` — default dataset (50,000 accepted PTA realisations by default).
-- `lr_signals_3PN_E_B_phase_expanded.npz` — expanded dataset used for the large-data / higher-dimensional analysis and phase-prediction training.
+- `PIPE_GWs_3PN_PTA_default_realizations.npz` — default dataset (50,000 accepted PTA realisations by default).
+- `PIPE_GWs_3PN_PTA_expanded_realizations.npz` — expanded dataset used for the large-data / higher-dimensional analysis and phase-prediction training.
 
 The scripts expect each NPZ to contain at least:
 
