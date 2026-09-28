@@ -34,37 +34,6 @@ def del_p(gwphi, cos_gwtheta, phi, theta,pdist):
     return pdist/c*(1-cosmu)
 
 
-# def get_phi(t,M,z0,eta,order=3):
-#     n0,e0,gamma_0=z0
-#     x10 = (tsun * M * n0)**(2./3)
-#     x0=x_x1(x10,e0,eta,order)
-#     k0=get_k(x0,e0,eta,order)
-    
-#     l=n0*t
-#     gamma=k0*l
-#     u=u_from_l_3PN(l,e0,x0,eta,order)
-
-#     phi=gamma_0+(1+k0)*l+get_w(x0,e0,eta,u,order)
-
-#     return phi
-
-def get_phi(t, M, z0, eta, order=3):
-    
-    n0, e0, gamma_0 = z0
-
-    _, _, _, phi = orbit_evolve(
-        tarr=t,
-        t0=0.0,
-        z0=(n0, e0, gamma_0, 0.0),  # (n0, e0, gamma0, l0)
-        M=M,
-        eta=eta,
-        order=order,
-        get_ngel=None,
-    )
-
-    return phi
-
-
 def get_hp_hx(zarr,M,eta,inc,dist,order):
     x, e, u,phi=zarr
     r1=rE(x,e,eta,u,order)
@@ -86,24 +55,48 @@ def cal_sp_sx_n(tz_arr,t0,Amp,M,z,eta,i,order):
     s_arr = [cumtrapz(h[i], x = tz_arr, initial=0) for i in range(len(h))]
     return s_arr
 
-def cal_sp_sx_A(t,t0,Amp,M,z,eta,i,order):
-    n,et,gamma_0,l_0=z
 
-    x10 = (tsun * M * n)**(2./3)
-    x0=x_x1(x10,et,eta,order)
-    x, e, u,phi=orbit_evolve(t,t0,z,M,eta,order)
+def get_phi(t,M,z0,eta,order=3):
+    n0,e0,gamma_0=z0
+    x10 = (tsun * M * n0)**(2./3)
+    x0=x_x1(x10,e0,eta,order)
+    k0=get_k(x0,e0,eta,order)
     
-    bb=get_beta(x,e,eta,order)
+    l=n0*t
+    gamma=k0*l
+    u=u_from_l_3PN(l,e0,x0,eta,order)
+
+    phi=gamma_0+(1+k0)*l+get_w(x0,e0,eta,u,order)
+
+    return phi
+
+    
+
+def cal_sp_sx_A(t,t0,Amp,M,z,eta,i,order):
+    n0,e0,gamma_0,l_0=z
+
+    x10 = (tsun * M * n0)**(2./3)
+    x0=x_x1(x10,e0,eta,order)
+    k0=get_k(x0,e0,eta,order)
+    
+    l0=n0*t
+    gamma=k0*l0
+    u=u_from_l_3PN(l0,e0,x0,eta,order)
+
+    phi=gamma_0+(1+k0)*l0+get_w(x0,e0,eta,u,order)
+    
+    bb=get_beta(x0,e0,eta,order)
+    
     vmu=2*arctan(bb*sin(u)/(1-bb*cos(u)))
     v=u+vmu
     
     omg=phi-v
     
-    e2=e*e
-    w=1-e*cos(u)
-    P=sqrt(1-e2)*(cos(2*u)-e*cos(u))/w
-    Q=((e2-2)*cos(u)+e)*sin(u)/w
-    R=e*sin(u)
+    et2=e0*e0
+    w=1-e0*cos(u)
+    P=sqrt(1-et2)*(cos(2*u)-e0*cos(u))/w
+    Q=((et2-2)*cos(u)+e0)*sin(u)/w
+    R=e0*sin(u)
     
     
     spA=((cos(i)**2+1)*(-P*sin(2*omg)+Q*cos(2*omg))+sin(i)**2*R)
@@ -166,16 +159,16 @@ def add_ecc_cgw(toas,
     
     Amp=10**log10_A
     if res=='Both':
-        spE,sxE=cal_sp_sx_n(tz_arr,0,Amp,M,z0,eta,inc,order)
-        spP,sxP=cal_sp_sx_n(tP_arr,0,Amp,M,z0,eta,inc,order)
+        spE,sxE=cal_sp_sx_A(tz_arr,0,Amp,M,z0,eta,inc,order)
+        spP,sxP=cal_sp_sx_A(tP_arr,0,Amp,M,z0,eta,inc,order)
         sp=spE-spP
         sx=sxE-sxP
         
     if res=='Earth':
-        sp,sx=cal_sp_sx_n(tz_arr,0,Amp,M,z0,eta,inc,order)
+        sp,sx=cal_sp_sx_A(tz_arr,0,Amp,M,z0,eta,inc,order)
 
     if res=='Pulsar':
-        spP,sxP=cal_sp_sx_n(tP_arr,0,Amp,M,z0,eta,inc,order)
+        spP,sxP=cal_sp_sx_A(tP_arr,0,Amp,M,z0,eta,inc,order)
         sp=-spP
         sx=-sxP
 
