@@ -30,7 +30,7 @@ Expanded 400k dataset:
 
 ```bash
 PIPE_PTA_N_TARGET=400000 \
-PIPE_PTA_OUTPUT=lr_signals_3PN_E_B_phase_expanded.npz \
+PIPE_PTA_OUTPUT=PIPE_GWs_3PN_PTA_expanded_realizations.npz \
 python data/gen_data.py
 ```
 
