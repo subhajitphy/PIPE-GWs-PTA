@@ -259,7 +259,7 @@ print("Y_by_pulsar:", Y_by_pulsar.shape)
 # ===================== Save =====================
 base_df_kept = pd.DataFrame(base_rows_kept)
 
-out_name = "lr_signals_3PN_E_B_phase.npz"
+out_name = "PIPE_GWs_3PN_PTA_default_realizations.npz"
 np.savez(
     out_name,
     X_E=X_E,
