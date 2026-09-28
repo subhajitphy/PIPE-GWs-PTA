@@ -75,10 +75,17 @@ scaler = torch.cuda.amp.GradScaler(enabled=AMP_ENABLED)
 
 
 # ==========================================================
-# Config
+# DATA
 # ==========================================================
-DATA_PATH = "/scratch/subh_phy/work/2Apr/new_method/data/bigdata_3PN/"
-NPZ_NAME  = "lr_signals_with_params_E_B_phase_base.npz"
+# Download one of the PTA realisation datasets from the accompanying
+# Zenodo repository:
+# https://doi.org/10.5281/zenodo.22972338
+#
+# Set DATA_PATH to the directory containing the downloaded dataset and
+# NPZ_NAME to the selected realisation file.
+
+DATA_PATH = ""
+NPZ_NAME  = ""
 
 SAVE_DIR = "./checkpoints_phase_tx_realisation_snr_10_100_loguniform"
 os.makedirs(SAVE_DIR, exist_ok=True)
