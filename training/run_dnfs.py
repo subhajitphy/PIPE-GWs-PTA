@@ -11,7 +11,7 @@ from torch.utils.data import TensorDataset, DataLoader
 # ==========================================================
 # PATHS
 # ==========================================================
-PKG_PATH = "/../packages/"
+PKG_PATH = "/../models/"
 sys.path.insert(0, PKG_PATH)
 
 from phase_predictor import PhaseProvider
