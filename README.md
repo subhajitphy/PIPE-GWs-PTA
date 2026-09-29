@@ -333,17 +333,6 @@ The generator stores the simulated timing residuals, orbital phase, source param
 
 ---
 
-## Output files
-
-Training outputs are written to mode-specific directories under:
-
-```text
-outputs/
-```
-
-The training scripts save model checkpoints, validation information, and training diagnostics.
-
----
 
 ## Reproducibility
 
