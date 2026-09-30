@@ -70,7 +70,18 @@ def get_phi(t,M,z0,eta,order=3):
 
     return phi
 
-    
+def orbit(tarr,t0,z0,M,eta,order):
+    n0,e0,gamma0,l0=z0
+    Mc=M*eta**(3/5)
+    n,e,l,g=evolve_orbit(tarr, Mc, eta, n0, e0, l0, gamma0, t0)
+    x1=(tsun * M * n)**(2./3)
+    x=x_x1(x1,e,eta,order)
+    u=np.array([u_from_l_3PN(l[ii],e[ii],x[ii],eta,order) for ii in range(len(l))])
+    phi=l+g+get_w(x,e,eta,u,order)
+
+    r1=rE(x,e,eta,u,order)
+
+    return r1*cos(phi),r1*sin(phi)
 
 def cal_sp_sx_A(t,t0,Amp,M,z,eta,i,order):
     n0,e0,gamma_0,l_0=z
